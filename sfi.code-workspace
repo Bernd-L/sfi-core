@@ -16,6 +16,12 @@
   ],
   "settings": {
     "editor.tabSize": 4,
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "rust-analyzer.diagnostics.disabled": ["macro-error", "missing-unsafe"],
+    "cSpell.words": [
+        "actix",
+        "concat",
+        "wasm"
+    ]
   }
 }
