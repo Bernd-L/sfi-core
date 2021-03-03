@@ -1,0 +1,21 @@
+// This is a workspace for VS Code which opens all sfi projects
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../sfi-gtk"
+    },
+    {
+      "path": "../sfi-server"
+    },
+    {
+      "path": "../sfi-web"
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false
+  }
+}
