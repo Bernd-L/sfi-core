@@ -14,3 +14,13 @@ description = "Manage shared food inventories (core library)"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# Core libs
+libocc = { path = "../libocc-rs", version = "0.4" }
+
+# Serde
+serde = "1"
+serde_derive = "1"
+
+# Other dependencies
+uuid = { version = "0.8", features = ["serde", "v4"] }
+anyhow = "1.0.38"

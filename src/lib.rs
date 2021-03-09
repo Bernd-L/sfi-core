@@ -1,7 +1,6 @@
+pub mod types;
+
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+    // implement unit tests (when there is business logic to be tested)
 }

@@ -21,6 +21,12 @@
     "cSpell.words": [
         "actix",
         "concat",
+        "jsonwebtoken",
+        "libocc",
+        "onclick",
+        "oninput",
+        "signup",
+        "totp",
         "wasm"
     ]
   }
