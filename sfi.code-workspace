@@ -25,9 +25,11 @@
         "libocc",
         "onclick",
         "oninput",
+        "readables",
         "signup",
         "totp",
-        "wasm"
+        "wasm",
+        "writables"
     ]
   }
 }
