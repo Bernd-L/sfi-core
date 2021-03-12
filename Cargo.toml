@@ -24,4 +24,3 @@ serde_derive = "1"
 # Other dependencies
 uuid = { version = "0.8", features = ["serde", "v4"] }
 anyhow = "1.0.38"
-# chrono = { version = "0.4", features = ["serde"] }
