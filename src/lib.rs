@@ -3,6 +3,7 @@ pub mod users;
 mod inventory;
 mod item;
 mod quantity;
+mod store;
 mod unit;
 
 pub use inventory::*;

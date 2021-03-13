@@ -21,18 +21,22 @@ pub struct Item {
 
     /// The timestamp of the creation of the item
     created_on: Timestamp,
+
+    /// The EAN code of the item
+    ean: Option<String>,
     // TODO categories
 }
 
 impl Item {
     /// Generates a new item
-    pub fn new(inventory: &Arc<Inventory>, name: String) -> Self {
+    pub fn new(inventory: &Arc<Inventory>, name: String, ean: Option<String>) -> Self {
         Self {
             uuid: Uuid::new_v4(),
             inventory: Arc::downgrade(inventory),
             name,
             units: vec![],
             created_on: Utc::now(),
+            ean,
         }
     }
 }

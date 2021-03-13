@@ -1,5 +1,5 @@
-use crate::{Item, Timestamp};
-use libocc::Utc;
+use crate::{store::Store, Item, Timestamp};
+use libocc::{Projector, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -44,6 +44,8 @@ impl Inventory {
             readables: vec![],
         }
     }
+
+    pub(super) fn from_event_log() {}
 }
 
 impl PartialEq for Inventory {
