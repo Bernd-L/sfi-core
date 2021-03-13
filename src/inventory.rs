@@ -1,5 +1,5 @@
-use crate::{store::Store, Item, Timestamp};
-use libocc::{Projector, Utc};
+use crate::{Item, Timestamp};
+use libocc::Utc;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -64,6 +64,11 @@ impl Inventory {
     /// The items in the inventory
     pub fn items(&self) -> &Vec<Item> {
         &self.items
+    }
+
+    /// The items in the inventory
+    pub(super) fn items_mut(&mut self) -> &mut Vec<Item> {
+        &mut self.items
     }
 
     /// The name of the inventory

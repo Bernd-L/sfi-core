@@ -63,6 +63,11 @@ impl Item {
         &self.inventory
     }
 
+    /// The inventory which this item belongs to
+    pub(super) fn inventory_uuid(&self) -> &Uuid {
+        &self.inventory_uuid
+    }
+
     /// The name of the item
     pub fn name(&self) -> &String {
         &self.name
@@ -71,6 +76,11 @@ impl Item {
     /// The units ot the item
     pub fn units(&self) -> &Vec<Unit> {
         &self.units
+    }
+
+    /// The units ot the item
+    pub(super) fn units_mut(&mut self) -> &mut Vec<Unit> {
+        &mut self.units
     }
 
     /// The timestamp of the creation of the item
