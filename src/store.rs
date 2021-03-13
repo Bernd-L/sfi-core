@@ -55,24 +55,16 @@ impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
 
 impl<'a> Store<'a> {
     pub fn inventories(&self) -> &Vec<Cow<Inventory>> {
-        self.inventories.get_projection()
-    }
-
-    pub fn items(&self) -> &Vec<Cow<Item>> {
-        self.items.get_projection()
-    }
-
-    pub fn units(&self) -> &Vec<Cow<Unit>> {
-        self.units.get_projection()
+        &self.inventories
     }
 }
 
 impl<'a> Store<'a> {
     pub fn new() -> Self {
         Self {
-            inventories: Projector::new(),
-            items: Projector::new(),
-            units: Projector::new(),
+            inventories_projector: Projector::new(),
+            items_projector: Projector::new(),
+            units_projector: Projector::new(),
         }
     }
 }

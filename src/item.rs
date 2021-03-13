@@ -13,6 +13,9 @@ pub struct Item {
     #[serde(skip)]
     inventory: Weak<Inventory>,
 
+    /// The inventory which this item belongs to
+    inventory_uuid: Uuid,
+
     /// The name of the item
     name: String,
 
@@ -33,6 +36,7 @@ impl Item {
         Self {
             uuid: Uuid::new_v4(),
             inventory: Arc::downgrade(inventory),
+            inventory_uuid: inventory.uuid().clone(),
             name,
             units: vec![],
             created_on: Utc::now(),

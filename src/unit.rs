@@ -7,6 +7,8 @@ use std::{
 };
 use uuid::Uuid;
 
+// #[serde(from = "UnitSer")]
+// #[serde(into = "UnitSer")]
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Unit {
     /// The UUID of the unit
@@ -15,6 +17,9 @@ pub struct Unit {
     /// The item which this unit belongs to
     #[serde(skip)]
     item: Weak<Item>,
+
+    /// The item which this unit belongs to
+    item_uuid: Uuid,
 
     /// The duration after opening after which the unit expires (if applicable)
     use_up_after: Option<Duration>,
@@ -43,6 +48,7 @@ impl Unit {
         Self {
             uuid: Uuid::new_v4(),
             item: Arc::downgrade(item),
+            item_uuid: item.uuid().clone(),
             use_up_after,
             name,
             percent_left,
@@ -94,3 +100,55 @@ impl Unit {
         &self.opened_on
     }
 }
+
+// #[derive(Deserialize, Serialize, Clone)]
+// struct UnitSer {
+//     /// The UUID of the unit
+//     uuid: Uuid,
+
+//     /// The item which this unit belongs to
+//     item_uuid: Uuid,
+
+//     /// The duration after opening after which the unit expires (if applicable)
+//     use_up_after: Option<Duration>,
+
+//     /// The name of the item
+//     name: String,
+
+//     /// The percentage of how much of the unit is left
+//     percent_left: f64,
+
+//     /// The timestamp of the creation of the unit
+//     created_on: Timestamp,
+
+//     /// The timestamp this unit was opened for the first time (if ever)
+//     opened_on: Option<Timestamp>,
+// }
+
+// impl Into<UnitSer> for Unit {
+//     fn into(self) -> UnitSer {
+//         UnitSer {
+//             uuid: self.uuid,
+//             item_uuid: *self.item.upgrade().unwrap().uuid(),
+//             use_up_after: self.use_up_after,
+//             name: self.name,
+//             percent_left: self.percent_left,
+//             created_on: self.created_on,
+//             opened_on: self.opened_on,
+//         }
+//     }
+// }
+
+// impl From<UnitSer> for Unit {
+//     fn from(ser: UnitSer) -> Self {
+//         Self {
+//             uuid: ser.uuid,
+//             item: Weak::new(),
+//             use_up_after: ser.use_up_after,
+//             name: ser.name,
+//             percent_left: ser.percent_left,
+//             created_on: ser.created_on,
+//             opened_on: ser.opened_on,
+//         }
+//     }
+// }
