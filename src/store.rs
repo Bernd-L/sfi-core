@@ -8,27 +8,27 @@ use std::{
 };
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum EventType {
+pub enum ProjectionEntry {
     Inventory(Inventory),
     Item(Item),
     Unit(Unit),
 }
 
-impl PartialEq for EventType {
+impl PartialEq for ProjectionEntry {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             // Use the equality of the underlying types
-            (EventType::Inventory(s), EventType::Inventory(o)) => s == o,
-            (EventType::Item(s), EventType::Item(o)) => s == o,
-            (EventType::Unit(s), EventType::Unit(o)) => s == o,
+            (ProjectionEntry::Inventory(s), ProjectionEntry::Inventory(o)) => s == o,
+            (ProjectionEntry::Item(s), ProjectionEntry::Item(o)) => s == o,
+            (ProjectionEntry::Unit(s), ProjectionEntry::Unit(o)) => s == o,
 
             // Non-matching variants can't be equal
-            (EventType::Inventory(_), EventType::Item(_)) => false,
-            (EventType::Inventory(_), EventType::Unit(_)) => false,
-            (EventType::Item(_), EventType::Inventory(_)) => false,
-            (EventType::Item(_), EventType::Unit(_)) => false,
-            (EventType::Unit(_), EventType::Inventory(_)) => false,
-            (EventType::Unit(_), EventType::Item(_)) => false,
+            (ProjectionEntry::Inventory(_), ProjectionEntry::Item(_)) => false,
+            (ProjectionEntry::Inventory(_), ProjectionEntry::Unit(_)) => false,
+            (ProjectionEntry::Item(_), ProjectionEntry::Inventory(_)) => false,
+            (ProjectionEntry::Item(_), ProjectionEntry::Unit(_)) => false,
+            (ProjectionEntry::Unit(_), ProjectionEntry::Inventory(_)) => false,
+            (ProjectionEntry::Unit(_), ProjectionEntry::Item(_)) => false,
         }
     }
 }
@@ -44,7 +44,7 @@ struct Store<'a> {
 /// The serialized version of Store
 #[derive(Deserialize, Serialize, Clone)]
 struct StoreSer<'a> {
-    inventory_projectors: Vec<Projector<'a, EventType>>,
+    inventory_projectors: Vec<Projector<'a, ProjectionEntry>>,
 }
 
 impl<'a> Into<StoreSer<'a>> for Store<'a> {
@@ -75,34 +75,34 @@ impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
 
 #[derive(Clone)]
 struct InventoryHandle<'a> {
-    projector: Projector<'a, EventType>,
+    projector: Projector<'a, ProjectionEntry>,
     inventory: Inventory,
 }
 
-impl<'a> TryFrom<Projector<'a, EventType>> for InventoryHandle<'a> {
+impl<'a> TryFrom<Projector<'a, ProjectionEntry>> for InventoryHandle<'a> {
     type Error = anyhow::Error;
 
-    fn try_from(projector: Projector<'a, EventType>) -> Result<Self, Self::Error> {
+    fn try_from(projector: Projector<'a, ProjectionEntry>) -> Result<Self, Self::Error> {
         let mut inventory_option = None;
         let mut items = HashMap::new();
         let mut units = vec![];
 
         // Split up the entries in the projection based on their types
-        for event in projector.get_projection().clone() {
-            match event.into_owned() {
-                EventType::Inventory(inventory) => {
+        for projected_thing in projector.get_projection().clone() {
+            match projected_thing.into_owned() {
+                ProjectionEntry::Inventory(inventory) => {
                     if inventory_option.is_some() {
                         bail!("Cannot have two inventories in one projector");
                     } else {
                         inventory_option = Some(inventory);
                     }
                 }
-                EventType::Item(item) => {
+                ProjectionEntry::Item(item) => {
                     if items.insert(item.uuid().clone(), item).is_some() {
                         bail!("Cannot have two items with the same uuid");
                     }
                 }
-                EventType::Unit(unit) => {
+                ProjectionEntry::Unit(unit) => {
                     units.push(unit);
                 }
             }

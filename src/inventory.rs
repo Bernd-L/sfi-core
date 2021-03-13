@@ -1,5 +1,7 @@
-use crate::{Item, Timestamp};
-use libocc::Utc;
+use std::borrow::Cow;
+
+use crate::{store::ProjectionEntry, Item, Timestamp};
+use libocc::{Event, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -32,7 +34,7 @@ pub struct Inventory {
 
 impl Inventory {
     /// Generates a new inventory
-    pub fn new(name: String, owner: Uuid) -> Self {
+    pub(super) fn new(name: String, owner: Uuid) -> Self {
         Self {
             uuid: Uuid::new_v4(),
             items: vec![],
@@ -44,8 +46,6 @@ impl Inventory {
             readables: vec![],
         }
     }
-
-    pub(super) fn from_event_log() {}
 }
 
 impl PartialEq for Inventory {
@@ -99,5 +99,69 @@ impl Inventory {
     /// A list of UUIDs of users who have administrative read-only to this inventory
     pub fn readables(&self) -> &Vec<Uuid> {
         &self.readables
+    }
+}
+
+// Changers
+impl<'a> Inventory {
+    /// Generates a new inventory
+    pub fn create(name: String, owner: Uuid) -> Event<'a, ProjectionEntry> {
+        Event::create(Cow::Owned(ProjectionEntry::Inventory(Self {
+            uuid: Uuid::new_v4(),
+            items: vec![],
+            name,
+            created_on: Utc::now(),
+            owner,
+            admins: vec![],
+            writables: vec![],
+            readables: vec![],
+        })))
+    }
+
+    pub fn delete(self) -> Event<'a, ProjectionEntry> {
+        Event::delete(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            ..self
+        })))
+    }
+
+    pub fn update_name(self, name: String) -> Event<'a, ProjectionEntry> {
+        Event::update(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            name,
+            ..self
+        })))
+    }
+
+    pub fn update_owner(self, owner: Uuid) -> Event<'a, ProjectionEntry> {
+        Event::update(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            owner,
+            ..self
+        })))
+    }
+
+    pub fn update_admins(self, admins: Vec<Uuid>) -> Event<'a, ProjectionEntry> {
+        Event::update(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            admins,
+            ..self
+        })))
+    }
+
+    pub fn update_writables(self, writables: Vec<Uuid>) -> Event<'a, ProjectionEntry> {
+        Event::update(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            writables,
+            ..self
+        })))
+    }
+
+    pub fn update_readables(self, readables: Vec<Uuid>) -> Event<'a, ProjectionEntry> {
+        Event::update(Cow::Owned(ProjectionEntry::Inventory(Self {
+            items: vec![],
+            readables,
+            ..self
+        })))
     }
 }
