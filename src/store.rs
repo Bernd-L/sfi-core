@@ -1,70 +1,59 @@
+use std::convert::TryFrom;
+
 use crate::{Inventory, Item, Unit};
 use libocc::Projector;
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, convert::TryFrom};
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum EventType {
+    Inventory(Inventory),
+    Item(Item),
+    Unit(Unit),
+}
+
+impl PartialEq for EventType {
+    fn eq(&self, other: &Self) -> bool {
+        match (*self, *other) {
+            // Use the equality of the underlying types
+            (EventType::Inventory(s), EventType::Inventory(o)) => s == o,
+            (EventType::Item(s), EventType::Item(o)) => s == o,
+            (EventType::Unit(s), EventType::Unit(o)) => s == o,
+
+            // Non-matching variants can't be equal
+            (EventType::Inventory(_), EventType::Item(_)) => false,
+            (EventType::Inventory(_), EventType::Unit(_)) => false,
+            (EventType::Item(_), EventType::Inventory(_)) => false,
+            (EventType::Item(_), EventType::Unit(_)) => false,
+            (EventType::Unit(_), EventType::Inventory(_)) => false,
+            (EventType::Unit(_), EventType::Item(_)) => false,
+        }
+    }
+}
+
+/// The serialized version of Store
+#[serde(try_from = "StoreSer")]
+#[serde(into = "StoreSer")]
+#[derive(Deserialize, Serialize, Clone)]
+struct Store<'a> {
+    inventories: Vec<Projector<'a, EventType>>,
+}
 
 /// The serialized version of Store
 #[derive(Deserialize, Serialize, Clone)]
 struct StoreSer<'a> {
-    inventories_projector: Projector<'a, Inventory>,
-    items_projector: Projector<'a, Item>,
-    units_projector: Projector<'a, Unit>,
-}
-
-#[serde(try_from = "StoreSer")]
-#[serde(into = "StoreSer")]
-#[derive(Deserialize, Serialize, Clone)]
-pub struct Store<'a> {
-    inventories: Vec<Cow<'a, Inventory>>,
-
-    inventories_projector: Projector<'a, Inventory>,
-    items_projector: Projector<'a, Item>,
-    units_projector: Projector<'a, Unit>,
+    inventories: Vec<Projector<'a, EventType>>,
 }
 
 impl<'a> Into<StoreSer<'a>> for Store<'a> {
     fn into(self) -> StoreSer<'a> {
-        StoreSer {
-            inventories_projector: self.inventories_projector,
-            items_projector: self.items_projector,
-            units_projector: self.units_projector,
-        }
+        todo!()
     }
 }
 
 impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
     type Error = anyhow::Error;
 
-    fn try_from(store: StoreSer<'a>) -> Result<Self, Self::Error> {
-        // Make mutable projections
-        let mut inventories = store.inventories_projector.get_projection().clone();
-        let mut items = store.items_projector.get_projection().clone();
-        let mut units = store.units_projector.get_projection().clone();
-
-        for inventory in inventories {}
-
-        Ok(Self {
-            inventories,
-
-            inventories_projector: store.inventories_projector,
-            items_projector: store.items_projector,
-            units_projector: store.units_projector,
-        })
-    }
-}
-
-impl<'a> Store<'a> {
-    pub fn inventories(&self) -> &Vec<Cow<Inventory>> {
-        &self.inventories
-    }
-}
-
-impl<'a> Store<'a> {
-    pub fn new() -> Self {
-        Self {
-            inventories_projector: Projector::new(),
-            items_projector: Projector::new(),
-            units_projector: Projector::new(),
-        }
+    fn try_from(value: StoreSer<'a>) -> Result<Self, Self::Error> {
+        todo!()
     }
 }
