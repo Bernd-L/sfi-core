@@ -1,10 +1,13 @@
 use crate::{Inventory, Item, Unit};
-use anyhow::{anyhow, bail};
-use libocc::Projector;
+use anyhow::{anyhow, bail, Result};
+use libocc::{Event, Projector};
 use serde::{Deserialize, Serialize};
 use std::{
+    borrow::Cow,
     collections::HashMap,
     convert::{TryFrom, TryInto},
+    mem,
+    rc::Rc,
 };
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -37,7 +40,7 @@ impl PartialEq for ProjectionEntry {
 #[serde(try_from = "StoreSer")]
 #[serde(into = "StoreSer")]
 #[derive(Deserialize, Serialize, Clone)]
-struct Store<'a> {
+pub struct Store<'a> {
     inventory_handles: Vec<InventoryHandle<'a>>,
 }
 
@@ -77,6 +80,152 @@ impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
 struct InventoryHandle<'a> {
     projector: Projector<'a, ProjectionEntry>,
     inventory: Inventory,
+}
+
+impl<'a> InventoryHandle<'a> {
+    // There is no create_inventory(), as every inventory has its own event log
+
+    pub fn update_inventory(&mut self, mut inventory: Inventory) -> Result<()> {
+        // TODO check for update permissions
+
+        // Preserve the items of the inventory
+        *inventory.items_mut() = mem::take(self.inventory.items_mut());
+
+        // Replace the target
+        self.inventory = inventory.clone();
+
+        // Make an event
+        self.projector
+            .push(Event::update(Cow::Owned(ProjectionEntry::Inventory(
+                inventory,
+            ))))
+    }
+
+    pub fn delete_inventory(&mut self, inventory: Inventory) -> Result<()> {
+        // TODO check for update permissions
+
+        // TODO Remove the index
+        // mem::take(&mut self.inventory);
+
+        // Make an event
+        self.projector
+            .push(Event::delete(Cow::Owned(ProjectionEntry::Inventory(
+                inventory,
+            ))))
+    }
+
+    pub fn create_item(&mut self, item: Item) -> Result<()> {
+        // Make an event
+        self.projector
+            .push(Event::create(Cow::Owned(ProjectionEntry::Item(
+                item.clone(),
+            ))))?;
+
+        self.inventory.items_mut().push(item);
+
+        Ok(())
+    }
+
+    pub fn update_item(&mut self, mut item: Item) -> Result<()> {
+        let target = self
+            .inventory
+            .items_mut()
+            .iter_mut()
+            .find(|i| i.uuid() == item.uuid())
+            .ok_or(anyhow!("Item not found"))?;
+
+        // Preserve the units of the item
+        *item.units_mut() = mem::take(target.units_mut());
+
+        // Replace the target
+        *target = item.clone();
+
+        // Make an event
+        self.projector
+            .push(Event::update(Cow::Owned(ProjectionEntry::Item(item))))
+    }
+
+    pub fn delete_item(&mut self, item: Item) -> Result<()> {
+        let index = self
+            .inventory
+            .items_mut()
+            .iter_mut()
+            .position(|i| i.uuid() == item.uuid())
+            .ok_or(anyhow!("Item not found"))?;
+
+        // Remove the index
+        self.inventory.items_mut().remove(index);
+
+        // Make an event
+        self.projector
+            .push(Event::delete(Cow::Owned(ProjectionEntry::Item(item))))
+    }
+
+    pub fn create_unit(&mut self, unit: Unit) -> Result<()> {
+        // Get the units of the associated item
+        let units = self
+            .inventory
+            .items_mut()
+            .iter_mut()
+            .find(|i| i.uuid() == unit.item_uuid())
+            .ok_or(anyhow!("Item not found"))?
+            .units_mut();
+
+        // Add the unit
+        units.push(unit.clone());
+
+        // Make an event
+        self.projector
+            .push(Event::create(Cow::Owned(ProjectionEntry::Unit(unit))))
+    }
+
+    pub fn update_unit(&mut self, unit: Unit) -> Result<()> {
+        // Get the units of the associated item
+        let units = self
+            .inventory
+            .items_mut()
+            .iter_mut()
+            .find(|i| i.uuid() == unit.item_uuid())
+            .ok_or(anyhow!("Item not found"))?
+            .units_mut();
+
+        // Find the unt to replace
+        let target = units
+            .iter_mut()
+            .find(|u| u.uuid() == unit.uuid())
+            .ok_or(anyhow!("Unit not found"))?;
+
+        // Replace the target
+        *target = unit.clone();
+
+        // Make an event
+        self.projector
+            .push(Event::update(Cow::Owned(ProjectionEntry::Unit(unit))))
+    }
+
+    pub fn delete_unit(&mut self, unit: Unit) -> Result<()> {
+        // Get the units of the associated item
+        let units = self
+            .inventory
+            .items_mut()
+            .iter_mut()
+            .find(|i| i.uuid() == unit.item_uuid())
+            .ok_or(anyhow!("Item not found"))?
+            .units_mut();
+
+        // Find the index of the unit to be deleted
+        let index = units
+            .iter()
+            .position(|u| u.uuid() == unit.uuid())
+            .ok_or(anyhow!("Unit not found"))?;
+
+        // Remove the index
+        units.remove(index);
+
+        // Make an event
+        self.projector
+            .push(Event::delete(Cow::Owned(ProjectionEntry::Unit(unit))))
+    }
 }
 
 impl<'a> TryFrom<Projector<'a, ProjectionEntry>> for InventoryHandle<'a> {

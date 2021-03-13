@@ -70,6 +70,11 @@ impl Unit {
         &self.uuid
     }
 
+    /// The UUID of the unit
+    pub(super) fn item_uuid(&self) -> &Uuid {
+        &self.item_uuid
+    }
+
     /// The item which this unit belongs to
     pub fn inventory(&self) -> &Weak<Item> {
         &self.item
