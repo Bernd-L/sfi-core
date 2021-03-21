@@ -15,7 +15,7 @@ description = "Manage shared food inventories (core library)"
 
 [dependencies]
 # Core libs
-libocc = { path = "../libocc-rs", version = "0.4" }
+libocc = { path = "../libocc-rs", version = "0.5" }
 
 # Serde
 serde = "1"

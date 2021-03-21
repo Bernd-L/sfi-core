@@ -7,8 +7,10 @@ use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
     mem,
+    ops::Deref,
     rc::Rc,
 };
+use uuid::Uuid;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum ProjectionEntry {
@@ -44,6 +46,22 @@ pub struct Store<'a> {
     inventory_handles: Vec<InventoryHandle<'a>>,
 }
 
+impl<'a> Deref for Store<'a> {
+    type Target = Vec<InventoryHandle<'a>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inventory_handles
+    }
+}
+
+impl<'a> Store<'a> {
+    pub fn new() -> Self {
+        Self {
+            inventory_handles: vec![],
+        }
+    }
+}
+
 /// The serialized version of Store
 #[derive(Deserialize, Serialize, Clone)]
 struct StoreSer<'a> {
@@ -77,12 +95,40 @@ impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
 }
 
 #[derive(Clone)]
-struct InventoryHandle<'a> {
+pub struct InventoryHandle<'a> {
     projector: Projector<'a, ProjectionEntry>,
     inventory: Inventory,
 }
 
+impl<'a> Deref for InventoryHandle<'a> {
+    type Target = Inventory;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inventory
+    }
+}
+
 impl<'a> InventoryHandle<'a> {
+    pub fn get_projector(&self) -> &Projector<'a, ProjectionEntry> {
+        &self.projector
+    }
+
+    pub fn is_owned_by(&self, user_uuid: &Uuid) -> bool {
+        self.inventory.owner() == user_uuid
+    }
+
+    pub fn allow_admin(&self, user_uuid: &Uuid) -> bool {
+        self.is_owned_by(user_uuid) || self.inventory.admins().iter().any(|a| a == user_uuid)
+    }
+
+    pub fn allow_write(&self, user_uuid: &Uuid) -> bool {
+        self.allow_admin(user_uuid) || self.inventory.writables().iter().any(|w| w == user_uuid)
+    }
+
+    pub fn allow_read(&self, user_uuid: &Uuid) -> bool {
+        self.allow_write(user_uuid) || self.inventory.readables().iter().any(|w| w == user_uuid)
+    }
+
     // There is no create_inventory(), as every inventory has its own event log
 
     pub fn update_inventory(&mut self, mut inventory: Inventory) -> Result<()> {
