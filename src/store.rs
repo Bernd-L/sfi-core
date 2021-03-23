@@ -8,11 +8,10 @@ use std::{
     convert::{TryFrom, TryInto},
     mem,
     ops::Deref,
-    rc::Rc,
 };
 use uuid::Uuid;
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum ProjectionEntry {
     Inventory(Inventory),
     Item(Item),
@@ -62,6 +61,22 @@ impl<'a> Store<'a> {
     }
 }
 
+impl<'a> Store<'a> {
+    pub fn make_inventory(&mut self, name: String, owner: Uuid) -> Uuid {
+        // Create the new inventory handle
+        let handle = InventoryHandle::new(name, owner);
+
+        // Get the UUID of the new handle
+        let uuid = handle.uuid().clone();
+
+        // Store the new handle in the store
+        self.inventory_handles.push(handle);
+
+        // Return the UUID of the new inventory
+        uuid
+    }
+}
+
 /// The serialized version of Store
 #[derive(Deserialize, Serialize, Clone)]
 struct StoreSer<'a> {
@@ -94,7 +109,7 @@ impl<'a> TryFrom<StoreSer<'a>> for Store<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct InventoryHandle<'a> {
     projector: Projector<'a, ProjectionEntry>,
     inventory: Inventory,
@@ -130,6 +145,26 @@ impl<'a> InventoryHandle<'a> {
     }
 
     // There is no create_inventory(), as every inventory has its own event log
+    // Instead, `new` generates a new inventory:
+    pub fn new(name: String, owner: Uuid) -> Self {
+        // Make a new projector for the  new inventory
+        let mut projector = Projector::new();
+
+        // Make a new event to push onto the projector
+        let (creation_event, uuid, created_on) = Inventory::create(name.clone(), owner);
+
+        // Make the new inventory from the values yielded by event creation
+        let inventory = Inventory::new(name, owner, uuid, created_on);
+
+        // Push the event onto the projector
+        // Unwraps safely, because the projector (and its segment) is created before the event is made
+        projector.push(creation_event).unwrap();
+
+        Self {
+            projector,
+            inventory,
+        }
+    }
 
     pub fn update_inventory(&mut self, mut inventory: Inventory) -> Result<()> {
         // TODO check for update permissions

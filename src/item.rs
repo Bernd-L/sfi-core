@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Weak};
 use uuid::Uuid;
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Item {
     /// The UUID of the item
     uuid: Uuid,

@@ -5,7 +5,7 @@ use libocc::{Event, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Inventory {
     /// The UUID of the inventory
     uuid: Uuid,
@@ -34,12 +34,12 @@ pub struct Inventory {
 
 impl Inventory {
     /// Generates a new inventory
-    pub(super) fn new(name: String, owner: Uuid) -> Self {
+    pub(super) fn new(name: String, owner: Uuid, uuid: Uuid, created_on: Timestamp) -> Self {
         Self {
-            uuid: Uuid::new_v4(),
+            uuid,
             items: vec![],
             name,
-            created_on: Utc::now(),
+            created_on,
             owner,
             admins: vec![],
             writables: vec![],
@@ -104,18 +104,25 @@ impl Inventory {
 
 // Changers
 impl<'a> Inventory {
-    /// Generates a new inventory
-    pub fn create(name: String, owner: Uuid) -> Event<'a, ProjectionEntry> {
-        Event::create(Cow::Owned(ProjectionEntry::Inventory(Self {
-            uuid: Uuid::new_v4(),
-            items: vec![],
-            name,
-            created_on: Utc::now(),
-            owner,
-            admins: vec![],
-            writables: vec![],
-            readables: vec![],
-        })))
+    /// Generates a new inventory (and returns the associated event together with the new timestamp and the new UUID)
+    pub fn create(name: String, owner: Uuid) -> (Event<'a, ProjectionEntry>, Uuid, Timestamp) {
+        let uuid = Uuid::new_v4();
+        let created_on = Utc::now();
+
+        (
+            Event::create(Cow::Owned(ProjectionEntry::Inventory(Self {
+                uuid,
+                items: vec![],
+                name,
+                created_on,
+                owner,
+                admins: vec![],
+                writables: vec![],
+                readables: vec![],
+            }))),
+            uuid,
+            created_on,
+        )
     }
 
     pub fn delete(self) -> Event<'a, ProjectionEntry> {

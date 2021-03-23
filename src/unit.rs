@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 // #[serde(from = "UnitSer")]
 // #[serde(into = "UnitSer")]
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Unit {
     /// The UUID of the unit
     uuid: Uuid,
