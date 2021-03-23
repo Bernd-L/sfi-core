@@ -29,7 +29,8 @@
         "signup",
         "totp",
         "wasm",
-        "writables"
+        "writables",
+        "yewtil"
     ]
   }
 }

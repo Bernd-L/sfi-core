@@ -157,7 +157,7 @@ impl<'a> InventoryHandle<'a> {
         let inventory = Inventory::new(name, owner, uuid, created_on);
 
         // Push the event onto the projector
-        // Unwraps safely, because the projector (and its segment) is created before the event is made
+        // Unwraps safely, because the projector and its segment are created before the event is made
         projector.push(creation_event).unwrap();
 
         Self {
