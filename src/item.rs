@@ -32,7 +32,7 @@ pub struct Item {
 
 impl Item {
     /// Generates a new item
-    pub fn new(inventory: &Arc<Inventory>, name: String, ean: Option<String>) -> Self {
+    pub(super) fn new(inventory: &Arc<Inventory>, name: String, ean: Option<String>) -> Self {
         Self {
             uuid: Uuid::new_v4(),
             inventory: Arc::downgrade(inventory),
@@ -88,3 +88,5 @@ impl Item {
         &self.created_on
     }
 }
+
+impl Item {}
