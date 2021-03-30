@@ -1,7 +1,13 @@
-use crate::{Inventory, Timestamp, Unit};
-use libocc::Utc;
+use crate::{
+    store::{ProjectionEntry, ProjectionEvent},
+    Inventory, Timestamp, Unit,
+};
+use libocc::{Event, Utc};
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, Weak};
+use std::{
+    borrow::Cow,
+    sync::{Arc, Weak},
+};
 use uuid::Uuid;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -89,4 +95,57 @@ impl Item {
     }
 }
 
-impl Item {}
+impl<'a> Item {
+    /// Generates a new inventory (and returns the associated event together with the new timestamp and the new UUID)
+    pub fn create(
+        inventory: &Arc<Inventory>,
+        name: String,
+        ean: Option<String>,
+    ) -> ProjectionEvent<'a> {
+        let uuid = Uuid::new_v4();
+        let created_on = Utc::now();
+
+        Event::create(Cow::Owned(ProjectionEntry::Item(Self {
+            uuid,
+            inventory: Arc::downgrade(inventory),
+            inventory_uuid: inventory.uuid().clone(),
+            name,
+            units: vec![],
+            created_on,
+            ean,
+        })))
+    }
+
+    pub fn delete(self) -> ProjectionEvent<'a> {
+        // TODO notify the inventory of the deletion of this item
+        Event::delete(Cow::Owned(ProjectionEntry::Item(Self {
+            units: vec![],
+            inventory: Weak::new(),
+            ..self
+        })))
+    }
+
+    pub fn update_inventory(self, inventory: &Arc<Inventory>) -> ProjectionEvent<'a> {
+        // TODO notify the inventories of the moving of this item
+        Event::update(Cow::Owned(ProjectionEntry::Item(Self {
+            inventory: Arc::downgrade(inventory),
+            ..self
+        })))
+    }
+
+    pub fn update_name(self, name: String) -> ProjectionEvent<'a> {
+        Event::update(Cow::Owned(ProjectionEntry::Item(Self { name, ..self })))
+    }
+
+    // TODO implement some kind of access to push, find and so on of the units vev
+    // pub fn update_units(self, units: Vec<>) -> ProjectionEvent<'a> {
+    //     Event::update(Cow::Owned(ProjectionEntry::Item(Self {
+    //         units,
+    //         ..self
+    //     })))
+    // }
+
+    pub fn update_ean(self, ean: Option<String>) -> ProjectionEvent<'a> {
+        Event::update(Cow::Owned(ProjectionEntry::Item(Self { ean, ..self })))
+    }
+}

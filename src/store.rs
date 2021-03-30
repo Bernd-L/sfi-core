@@ -123,6 +123,8 @@ impl<'a> Deref for InventoryHandle<'a> {
     }
 }
 
+pub type ProjectionEvent<'a> = Event<'a, ProjectionEntry>;
+
 impl<'a> InventoryHandle<'a> {
     pub fn get_projector(&self) -> &Projector<'a, ProjectionEntry> {
         &self.projector
