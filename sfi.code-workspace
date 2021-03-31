@@ -20,6 +20,7 @@
     "rust-analyzer.diagnostics.disabled": ["macro-error", "missing-unsafe"],
     "cSpell.words": [
         "actix",
+        "clippy",
         "concat",
         "jsonwebtoken",
         "libocc",
