@@ -17,21 +17,25 @@
   "settings": {
     "editor.tabSize": 4,
     "editor.detectIndentation": false,
-    "rust-analyzer.diagnostics.disabled": ["macro-error", "missing-unsafe"],
+    "rust-analyzer.diagnostics.disabled": [
+      "macro-error",
+      "missing-unsafe",
+      "unresolved-macro-call"
+    ],
     "cSpell.words": [
-        "actix",
-        "clippy",
-        "concat",
-        "jsonwebtoken",
-        "libocc",
-        "onclick",
-        "oninput",
-        "readables",
-        "signup",
-        "totp",
-        "wasm",
-        "writables",
-        "yewtil"
+      "actix",
+      "clippy",
+      "concat",
+      "jsonwebtoken",
+      "libocc",
+      "onclick",
+      "oninput",
+      "readables",
+      "signup",
+      "totp",
+      "wasm",
+      "writables",
+      "yewtil"
     ]
   }
 }
