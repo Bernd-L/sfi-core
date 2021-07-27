@@ -8,9 +8,10 @@
 
 mod tree;
 
+pub mod core;
 pub mod events;
 
-pub use libocc::events::Timestamp;
+pub use libocc::events::{Timestamp, Utc};
 
 #[cfg(test)]
 mod tests {
