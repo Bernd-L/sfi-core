@@ -1,6 +1,6 @@
-use crate::{Inventory, Item, Unit};
+use crate::events::{Inventory, Item, Unit};
 use anyhow::{anyhow, bail, Result};
-use libocc::{Event, Projector};
+use libocc::events::{Event, Projector};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::Cow,

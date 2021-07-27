@@ -1,8 +1,11 @@
 use crate::{
-    store::{ProjectionEntry, ProjectionEvent},
-    Inventory, Timestamp, Unit,
+    events::{
+        store::{ProjectionEntry, ProjectionEvent},
+        Inventory, Unit,
+    },
+    Timestamp,
 };
-use libocc::{Event, Utc};
+use libocc::events::{Event, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::Cow,

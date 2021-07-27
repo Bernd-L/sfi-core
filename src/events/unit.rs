@@ -1,5 +1,5 @@
-use crate::{Item, Timestamp};
-use libocc::Utc;
+use crate::{events::Item, Timestamp};
+use libocc::events::Utc;
 use serde::{Deserialize, Serialize};
 use std::{
     sync::{Arc, Weak},

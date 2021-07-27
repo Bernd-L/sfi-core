@@ -1,10 +1,13 @@
 use std::borrow::Cow;
 
 use crate::{
-    store::{ProjectionEntry, ProjectionEvent},
-    Item, Timestamp,
+    events::{
+        store::{ProjectionEntry, ProjectionEvent},
+        Item,
+    },
+    Timestamp,
 };
-use libocc::{Event, Utc};
+use libocc::events::{Event, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
