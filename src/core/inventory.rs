@@ -33,7 +33,7 @@ pub struct Inventory {
 
 impl Inventory {
     /// Generates a new inventory
-    pub(super) fn new(name: String, owner: Uuid) -> Self {
+    pub fn new(name: String, owner: Uuid) -> Self {
         Self {
             uuid: Uuid::new_v4(),
             items: vec![],

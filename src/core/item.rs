@@ -1,4 +1,4 @@
-use std::sync::{Arc, Weak};
+use std::sync::{Arc, RwLock, Weak};
 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -11,10 +11,9 @@ pub struct Item {
     /// The UUID of the item
     pub uuid: Uuid,
 
-    /// The inventory which this item belongs to
-    #[serde(skip)]
-    pub inventory: Weak<Inventory>,
-
+    // /// The inventory which this item belongs to
+    // #[serde(skip)]
+    // pub inventory: Weak<Inventory>,
     /// The inventory which this item belongs to
     pub inventory_uuid: Uuid,
 
@@ -34,11 +33,11 @@ pub struct Item {
 
 impl Item {
     /// Generates a new item
-    pub(super) fn new(inventory: &Arc<Inventory>, name: String, ean: Option<String>) -> Self {
+    pub fn new(inventory_uuid: Uuid, name: String, ean: Option<String>) -> Self {
         Self {
             uuid: Uuid::new_v4(),
-            inventory: Arc::downgrade(inventory),
-            inventory_uuid: inventory.uuid.clone(),
+            // inventory: Arc::downgrade(inventory.read().unwrap()),
+            inventory_uuid,
             name,
             units: vec![],
             created_on: Utc::now(),
